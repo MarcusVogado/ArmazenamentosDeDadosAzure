@@ -27,7 +27,40 @@ namespace AzureWebTable.Controllers
 
             return Ok(contato);
         }
+        [HttpPut("Atulizar")]
+        public IActionResult Atualizar(string id,Contato contato)
+        {
+            var tabelClient= GetTableClient();
+            var contatoTable = tabelClient.GetEntity<Contato>(id, id).Value;
+            contatoTable.Nome = contato.Nome;
+            contatoTable.Email = contato.Email;
+            contatoTable.Telefone = contato.Telefone;
 
+            tabelClient.UpsertEntity(contatoTable);
+            return Ok();
+        }
+        [HttpGet("Listar")]
+        public IActionResult ListarTodos()
+        {
+            var tableClient = GetTableClient();
+            var contatos= tableClient.Query<Contato>().ToList();
+            return Ok(contatos);
+        }
+        [HttpGet("ObterPorNome/{nome}")]
+        public IActionResult ObterPorNome(string nome)
+        {
+            var tableClient = GetTableClient();
+            var contatos = tableClient.Query<Contato>(c=>c.Nome==nome).ToList();
+            return Ok(contatos);
+        }
+
+        [HttpDelete("Deletar/{id}")]
+        public IActionResult DeletarContato(string id)
+        {
+            var tabelClient = GetTableClient();
+            tabelClient.DeleteEntity(id, id);
+            return NoContent(); 
+        }
 
         private TableClient GetTableClient()
         {
